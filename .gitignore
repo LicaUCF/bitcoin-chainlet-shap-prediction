@@ -1,0 +1,7 @@
+.venv/
+.idea/
+__pycache__/
+.DS_Store
+AmoChainletsInTime.txt
+OccChainletsInTime.txt
+pricedBitcoin2009-2018.csv

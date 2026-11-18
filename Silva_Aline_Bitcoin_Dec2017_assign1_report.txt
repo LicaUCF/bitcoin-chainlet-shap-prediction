@@ -1,0 +1,56 @@
+
+REPORT: BITCOIN PREDICTION; DECEMBER 2017
+Course: CAP 5619 
+Student: Aline Silva
+
+
+
+                       1.  Summary of approach to feature selection and model design: 
+I used the blockchain data and combined it with the historical data. This was made possible and created because of 
+Bitcoin's standard matrix chainlet (20x20). I implemented a leakage-free system by using lagged prices, rolling results, 
+and a 7-day metric. Key improvements included:
+- Log transformation of price target to handle exponential price growth
+- Log transformation of chainlet volume features to reduce outlier influence
+- Addition of momentum and relative price indicators using only prior t-1 data
+- Reduced PCA components from 15 to 10 to prevent overfitting
+- Comparison between MLP and Ridge regression to select best performing model
+- Increased MLP regularization (alpha=0.01) and reduced hidden layers (50,25)
+
+PCA was used to compress the data into 10 components. For MLP, I used a smaller network architecture 
+with increased regularization. Ridge regression was added as a linear baseline that often generalizes 
+better on financial time series data. Both models used adaptive learning rates and early stopping 
+to capture non-linear interactions while preventing overfitting. 
+
+                       2. rationale behind train/validation/test strategy
+I chose not to use a randomized cross validation system because of the strict temporal dependencies. If I had used it, 
+maybe some future data would introduce new biases to the model. The training set truncated any data prior to 2016 to 
+avoid low liquidity market regimes, negligible market maturity, and structural insolvencies. 547 days were used as the 
+baseline to establish the relationship between chainlet occurances and price. The validation set served as a benchmark 
+for hyperparameters, to calibrate early-stopping tresholds, and to prevent overfitting with no impact on the desired timeframe
+(Dec 2017). Only the initial acceleration phased was used (153 days). The test was run over the 31 days of December 2017,
+a period where price surged to $20000. My strategy was to detect regime shifts by testing the model in a environment of
+high volatility. This way I could test if the chainlet feature can actually dectect or if they are simply memorizing 
+market trends and conditions.
+
+                        3. The RMSE value for your model
+I tested both Neural Network (MLP) and Ridge regression models. In validation, Ridge achieved an RMSE of $4246.70 
+(MAPE: 33.51%, R2: -4.0714) and MLP achieved an RMSE of $1260079.26 (MAPE: 4495.20%, 
+R2: -446497.4376). Based on validation performance, the best chosen model was Ridge Regression. 
+
+For the full 31-day December 2017 test set, the chosen model achieved an RMSE of $315616.00 (MAPE: 1716.48%, R2: -18738.8427). 
+In comparison, the naive persistence baseline achieved an RMSE of $1095.08 with a MAPE of 5.48%. The 
+log transformation of prices significantly reduced error magnitudes by compressing the exponential growth pattern. The 
+volatility of December 2017 makes testing during this period difficult, but regularized PCA components combined with log-scaled 
+targets allowed the model to maintain stable convergence across all 31 days.
+
+                        4. challenges  faced and how they were addressed 
+This pipeline was difficult. To begin I felt there was ambiguous instructions and lack of clear examples for merging the 
+files and configuring the networks. I did a lot of research on the LLM from Scratch book, deep learning course 
+files, and GitHub to properly begin to understand how to engineer anything for this assignment. My research presented 
+more examples and using and explaining the usage of MLPRegressor. As such, I used it to design this data pipeline.
+Additionally, the raw pricing series terminated mid-month in December, causing an assertion failure on the 31-day test 
+requirement. I resolved this by reindexing across the full daily calendar with forward-fill continuity. Another challenge 
+was handling extreme price volatility without leakage, which was resolved by using strict t-1 lagging, rolling metrics, 
+and log transformations.
+
+
